@@ -1,0 +1,18 @@
+{
+  "cli": {
+    "version": ">= 5.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": "assembleRelease",
+        "env": {
+          "ANDROID_USES_CLEARTEXT_TRAFFIC": "true"
+        }
+      }
+    }
+  }
+}

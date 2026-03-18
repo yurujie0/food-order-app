@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { TextInput, Button, SegmentedButtons, Switch, Text, HelperText } from 'react-native-paper';
+import { launchImageLibrary, ImagePickerResponse, Asset } from 'react-native-image-picker';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Dish, DishCategory, CategoryLabels } from '../types';
 import { Colors } from '../constants/Colors';
 
@@ -12,6 +14,7 @@ interface AdminDishFormProps {
     category: DishCategory;
     description: string;
     image: string;
+    imageFile?: Asset | null;
     isAvailable: boolean;
   }) => void;
   onCancel: () => void;
@@ -33,6 +36,7 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
   const [category, setCategory] = useState<DishCategory>('hot');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
+  const [imageFile, setImageFile] = useState<Asset | null>(null);
   const [isAvailable, setIsAvailable] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -66,11 +70,28 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
     }
 
     if (!image.trim()) {
-      newErrors.image = '请输入图片链接';
+      newErrors.image = '请选择菜品图片';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const pickImage = async () => {
+    const result: ImagePickerResponse = await launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: false,
+      maxWidth: 800,
+      maxHeight: 600,
+      quality: 0.8,
+    });
+
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      setImageFile(asset);
+      setImage(asset.uri || '');
+      setErrors(prev => ({ ...prev, image: '' }));
+    }
   };
 
   const handleSubmit = () => {
@@ -82,6 +103,7 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
       category,
       description: description.trim(),
       image: image.trim(),
+      imageFile: imageFile,
       isAvailable,
     });
   };
@@ -132,14 +154,17 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
       />
       {errors.description && <HelperText type="error">{errors.description}</HelperText>}
 
-      <TextInput
-        label="图片链接"
-        value={image}
-        onChangeText={setImage}
-        mode="outlined"
-        error={!!errors.image}
-        style={styles.input}
-      />
+      <Text style={styles.label}>菜品图片</Text>
+      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+        {image ? (
+          <Image source={{ uri: image }} style={styles.imagePreview} />
+        ) : (
+          <View style={styles.imagePlaceholder}>
+            <MaterialCommunityIcons name="camera-plus" size={40} color={Colors.textMuted} />
+            <Text style={styles.imagePlaceholderText}>点击选择图片</Text>
+          </View>
+        )}
+      </TouchableOpacity>
       {errors.image && <HelperText type="error">{errors.image}</HelperText>}
 
       <View style={styles.switchContainer}>
@@ -188,6 +213,29 @@ const styles = StyleSheet.create({
   },
   segmentedButtons: {
     marginBottom: 16,
+  },
+  imagePicker: {
+    width: '100%',
+    height: 200,
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  imagePlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imagePlaceholderText: {
+    marginTop: 8,
+    color: Colors.textMuted,
+    fontSize: 14,
   },
   switchContainer: {
     flexDirection: 'row',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl, Alert } from 'react-native';
-import { Searchbar, FAB, Portal, Dialog, Snackbar, IconButton } from 'react-native-paper';
+import { View, StyleSheet, FlatList, RefreshControl, Alert, TouchableOpacity } from 'react-native';
+import { Searchbar, FAB, Portal, Dialog, Snackbar, Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useDishes } from '../../hooks/useDishes';
 import { DishCard } from '../../components/DishCard';
 import { AdminDishForm } from '../../components/AdminDishForm';
@@ -67,15 +68,39 @@ export default function AdminDishesScreen() {
     category: any;
     description: string;
     image: string;
+    imageFile?: any;
     isAvailable: boolean;
   }) => {
     setIsSubmitting(true);
     try {
+      // 如果有本地图片文件，读取为base64
+      let imageUrl = data.image;
+      if (data.imageFile && data.imageFile.uri) {
+        const response = await fetch(data.imageFile.uri);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        imageUrl = await new Promise((resolve) => {
+          reader.onloadend = () => {
+            resolve(reader.result as string);
+          };
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      const dishData = {
+        name: data.name,
+        price: data.price,
+        category: data.category,
+        description: data.description,
+        image: imageUrl,
+        isAvailable: data.isAvailable,
+      };
+
       if (editingDish) {
-        await updateDish(editingDish.id, data);
+        await updateDish(editingDish.id, dishData);
         setSnackbarMessage('菜品已更新');
       } else {
-        await createDish(data);
+        await createDish(dishData);
         setSnackbarMessage('菜品已添加');
       }
       setIsFormVisible(false);
@@ -95,21 +120,36 @@ export default function AdminDishesScreen() {
         showActions={false}
       />
       <View style={styles.actions}>
-        <IconButton
-          icon={item.isAvailable ? 'eye' : 'eye-off'}
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: item.isAvailable ? Colors.success + '20' : Colors.textMuted + '20' }]}
           onPress={() => toggleAvailability(item.id)}
-          iconColor={item.isAvailable ? Colors.success : Colors.textMuted}
-        />
-        <IconButton
-          icon="pencil"
+        >
+          <MaterialCommunityIcons
+            name={item.isAvailable ? 'eye-outline' : 'eye-off-outline'}
+            size={20}
+            color={item.isAvailable ? Colors.success : Colors.textMuted}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: Colors.info + '20' }]}
           onPress={() => handleEdit(item)}
-          iconColor={Colors.info}
-        />
-        <IconButton
-          icon="delete"
+        >
+          <MaterialCommunityIcons
+            name="pencil-outline"
+            size={20}
+            color={Colors.info}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: Colors.error + '20' }]}
           onPress={() => handleDelete(item)}
-          iconColor={Colors.error}
-        />
+        >
+          <MaterialCommunityIcons
+            name="trash-can-outline"
+            size={20}
+            color={Colors.error}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -195,17 +235,22 @@ const styles = StyleSheet.create({
   },
   actions: {
     position: 'absolute',
-    top: 8,
+    bottom: 16,
     right: 24,
     flexDirection: 'row',
-    backgroundColor: Colors.card,
-    borderRadius: 8,
-    elevation: 4,
+    gap: 8,
+  },
+  actionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
     shadowColor: Colors.shadow.medium,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    paddingHorizontal: 4,
   },
   fab: {
     position: 'absolute',

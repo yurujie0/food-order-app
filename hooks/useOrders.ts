@@ -52,12 +52,12 @@ export function useOrders(userId?: string) {
     try {
       const stats = await statsApi.getStats();
       return {
-        total: stats.total_orders,
-        pending: stats.pending_orders,
-        preparing: stats.preparing_orders,
-        completed: stats.completed_orders,
+        total: stats.totalOrders,
+        pending: stats.pendingOrders,
+        preparing: stats.preparingOrders,
+        completed: stats.completedOrders,
         cancelled: orders.filter(o => o.status === 'cancelled').length,
-        todayRevenue: stats.today_revenue,
+        todayRevenue: stats.todayRevenue,
       };
     } catch {
       // 如果获取失败，使用本地计算

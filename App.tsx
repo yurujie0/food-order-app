@@ -4,7 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Colors } from './constants/Colors';
 
@@ -26,41 +27,70 @@ import AdminOrdersScreen from './app/(admin)/orders';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// 自定义主题 - 温暖美食风格
 const theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
     primary: Colors.primary,
+    primaryContainer: Colors.primaryLight,
     secondary: Colors.secondary,
+    secondaryContainer: Colors.secondaryLight,
     background: Colors.background,
     surface: Colors.surface,
+    surfaceVariant: Colors.card,
     error: Colors.error,
-    onPrimary: Colors.card,
+    onPrimary: '#FFFFFF',
     onSurface: Colors.text,
+    onSurfaceVariant: Colors.textLight,
+    outline: Colors.border,
+    outlineVariant: Colors.divider,
   },
+  roundness: 4,
+};
+
+// 自定义 Tab Bar 样式
+const tabBarOptions = {
+  tabBarActiveTintColor: Colors.primary,
+  tabBarInactiveTintColor: Colors.textLight,
+  tabBarStyle: {
+    backgroundColor: Colors.card,
+    borderTopWidth: 0,
+    elevation: 8,
+    shadowColor: Colors.shadow.medium,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    height: 70,
+    paddingBottom: 10,
+    paddingTop: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  tabBarLabelStyle: {
+    fontSize: 12,
+    fontWeight: '500' as const,
+  },
+  headerShown: false,
 };
 
 // 用户底部导航
 function UserTabs() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textLight,
-        tabBarStyle: {
-          backgroundColor: Colors.card,
-          borderTopColor: Colors.border,
-        },
-        headerShown: false,
-      }}
-    >
+    <Tab.Navigator screenOptions={tabBarOptions}>
       <Tab.Screen
         name="HomeTab"
         component={HomeScreen}
         options={{
           title: '点餐',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="food" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialCommunityIcons
+                name={focused ? 'food' : 'food-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -69,8 +99,14 @@ function UserTabs() {
         component={CartScreen}
         options={{
           title: '购物车',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cart" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialCommunityIcons
+                name={focused ? 'cart' : 'cart-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -79,8 +115,14 @@ function UserTabs() {
         component={OrdersScreen}
         options={{
           title: '订单',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialCommunityIcons
+                name={focused ? 'clipboard-list' : 'clipboard-list-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -89,8 +131,14 @@ function UserTabs() {
         component={ProfileScreen}
         options={{
           title: '我的',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialCommunityIcons
+                name={focused ? 'account' : 'account-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -101,24 +149,20 @@ function UserTabs() {
 // 管理员底部导航
 function AdminTabs() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textLight,
-        tabBarStyle: {
-          backgroundColor: Colors.card,
-          borderTopColor: Colors.border,
-        },
-        headerShown: false,
-      }}
-    >
+    <Tab.Navigator screenOptions={tabBarOptions}>
       <Tab.Screen
         name="AdminDashboardTab"
         component={AdminDashboardScreen}
         options={{
           title: '仪表盘',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialIcons
+                name="dashboard"
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -127,8 +171,14 @@ function AdminTabs() {
         component={AdminDishesScreen}
         options={{
           title: '菜谱',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="food-variant" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialCommunityIcons
+                name={focused ? 'food' : 'food-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -137,8 +187,14 @@ function AdminTabs() {
         component={AdminOrdersScreen}
         options={{
           title: '订单',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabIcon : null}>
+              <MaterialCommunityIcons
+                name={focused ? 'clipboard-list' : 'clipboard-list-outline'}
+                size={size}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
@@ -155,7 +211,12 @@ function Navigation() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      >
         {!user ? (
           // Auth Stack
           <>
@@ -176,11 +237,23 @@ function Navigation() {
 
 export default function App() {
   return (
-    <PaperProvider theme={theme}>
-      <AuthProvider>
-        <Navigation />
-        <StatusBar style="auto" />
-      </AuthProvider>
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={theme}>
+        <AuthProvider>
+          <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }} edges={['top']}>
+            <Navigation />
+            <StatusBar style="dark" backgroundColor={Colors.background} />
+          </SafeAreaView>
+        </AuthProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }
+
+import { StyleSheet, View } from 'react-native';
+
+const styles = StyleSheet.create({
+  activeTabIcon: {
+    transform: [{ scale: 1.1 }],
+  },
+});

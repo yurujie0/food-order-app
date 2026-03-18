@@ -25,6 +25,7 @@ export interface Dish {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
   category: DishCategory;
   description: string;
   image: string;

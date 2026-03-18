@@ -196,11 +196,16 @@ const styles = StyleSheet.create({
   actions: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    right: 24,
     flexDirection: 'row',
     backgroundColor: Colors.card,
     borderRadius: 8,
-    elevation: 2,
+    elevation: 4,
+    shadowColor: Colors.shadow.medium,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    paddingHorizontal: 4,
   },
   fab: {
     position: 'absolute',

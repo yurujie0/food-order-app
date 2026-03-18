@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl, ScrollView } from 'react-native';
-import { Searchbar, Chip, Text, FAB, Portal, Snackbar } from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+} from 'react-native';
+import { Searchbar, Chip, Text, FAB, Snackbar } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useDishes } from '../../hooks/useDishes';
 import { useCart } from '../../hooks/useCart';
 import { DishCard } from '../../components/DishCard';
 import { Dish, CategoryLabels, DishCategory } from '../../types';
 import { Colors } from '../../constants/Colors';
 
-const categories: { key: DishCategory | 'all'; label: string }[] = [
-  { key: 'all', label: '全部' },
-  { key: 'hot', label: CategoryLabels.hot },
-  { key: 'cold', label: CategoryLabels.cold },
-  { key: 'soup', label: CategoryLabels.soup },
-  { key: 'staple', label: CategoryLabels.staple },
-  { key: 'drink', label: CategoryLabels.drink },
-  { key: 'dessert', label: CategoryLabels.dessert },
+const categories: { key: DishCategory | 'all'; label: string; icon: string }[] = [
+  { key: 'all', label: '全部', icon: 'food-variant' },
+  { key: 'hot', label: CategoryLabels.hot, icon: 'fire' },
+  { key: 'cold', label: CategoryLabels.cold, icon: 'snowflake' },
+  { key: 'soup', label: CategoryLabels.soup, icon: 'bowl-mix' },
+  { key: 'staple', label: CategoryLabels.staple, icon: 'rice' },
+  { key: 'drink', label: CategoryLabels.drink, icon: 'glass-cocktail' },
+  { key: 'dessert', label: CategoryLabels.dessert, icon: 'cake' },
 ];
 
 export default function HomeScreen() {
@@ -48,32 +55,51 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {/* 搜索栏 */}
-      <Searchbar
-        placeholder="搜索菜品..."
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        style={styles.searchBar}
-      />
+      <View style={styles.searchContainer}>
+        <Searchbar
+          placeholder="搜索美味..."
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchBar}
+          inputStyle={styles.searchInput}
+          iconColor={Colors.primary}
+          placeholderTextColor={Colors.textMuted}
+        />
+      </View>
 
       {/* 分类筛选 */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryContainer}
-        contentContainerStyle={styles.categoryContent}
-      >
-        {categories.map((cat) => (
-          <Chip
-            key={cat.key}
-            selected={selectedCategory === cat.key}
-            onPress={() => setSelectedCategory(cat.key)}
-            style={styles.categoryChip}
-            selectedColor={Colors.primary}
-          >
-            {cat.label}
-          </Chip>
-        ))}
-      </ScrollView>
+      <View style={styles.categoryWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryContent}
+        >
+          {categories.map((cat) => (
+            <Chip
+              key={cat.key}
+              selected={selectedCategory === cat.key}
+              onPress={() => setSelectedCategory(cat.key)}
+              style={[
+                styles.categoryChip,
+                selectedCategory === cat.key && styles.categoryChipSelected,
+              ]}
+              textStyle={[
+                styles.categoryChipText,
+                selectedCategory === cat.key && styles.categoryChipTextSelected,
+              ]}
+              icon={() => (
+                <MaterialCommunityIcons
+                  name={cat.icon as any}
+                  size={16}
+                  color={selectedCategory === cat.key ? '#FFF' : Colors.textLight}
+                />
+              )}
+            >
+              {cat.label}
+            </Chip>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* 菜品列表 */}
       <FlatList
@@ -81,13 +107,28 @@ export default function HomeScreen() {
         renderItem={renderDish}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refreshDishes} />
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refreshDishes}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+            progressBackgroundColor={Colors.card}
+          />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons
+              name="food-off"
+              size={80}
+              color={Colors.textMuted}
+            />
             <Text variant="bodyLarge" style={styles.emptyText}>
               暂无菜品
+            </Text>
+            <Text variant="bodySmall" style={styles.emptySubtext}>
+              换个分类试试看
             </Text>
           </View>
         }
@@ -97,7 +138,7 @@ export default function HomeScreen() {
       {totalCount > 0 && (
         <FAB
           icon="cart"
-          label={`购物车 (${totalCount})`}
+          label={`${totalCount}`}
           onPress={() => {}}
           style={styles.fab}
           color={Colors.card}
@@ -111,7 +152,10 @@ export default function HomeScreen() {
         duration={2000}
         style={styles.snackbar}
       >
-        已添加 {addedDish} 到购物车
+        <View style={styles.snackbarContent}>
+          <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
+          <Text style={styles.snackbarText}>已添加 {addedDish}</Text>
+        </View>
       </Snackbar>
     </View>
   );
@@ -122,42 +166,105 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  searchBar: {
-    margin: 16,
-    marginBottom: 8,
-    elevation: 2,
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
-  categoryContainer: {
-    maxHeight: 60,
+  searchBar: {
+    borderRadius: 16,
+    backgroundColor: Colors.card,
+    elevation: 2,
+    shadowColor: Colors.shadow.light,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  searchInput: {
+    fontSize: 15,
+    color: Colors.text,
+  },
+  categoryWrapper: {
     marginBottom: 8,
   },
   categoryContent: {
     paddingHorizontal: 16,
-    gap: 8,
+    paddingVertical: 8,
+    gap: 10,
   },
   categoryChip: {
-    marginRight: 8,
+    backgroundColor: Colors.card,
+    borderRadius: 20,
+    paddingHorizontal: 4,
+    elevation: 1,
+    shadowColor: Colors.shadow.light,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  categoryChipSelected: {
+    backgroundColor: Colors.primary,
+    elevation: 3,
+    shadowColor: Colors.shadow.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  categoryChipText: {
+    color: Colors.textLight,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  categoryChipTextSelected: {
+    color: '#FFF',
+    fontWeight: '600',
   },
   listContent: {
-    paddingBottom: 80,
+    paddingBottom: 100,
+    paddingTop: 8,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 100,
+    paddingTop: 120,
   },
   emptyText: {
     color: Colors.textLight,
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    color: Colors.textMuted,
+    fontSize: 14,
+    marginTop: 8,
   },
   fab: {
     position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
+    right: 20,
+    bottom: 20,
     backgroundColor: Colors.primary,
+    borderRadius: 28,
+    elevation: 6,
+    shadowColor: Colors.shadow.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
   },
   snackbar: {
     backgroundColor: Colors.success,
+    borderRadius: 12,
+    marginHorizontal: 16,
+  },
+  snackbarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  snackbarText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

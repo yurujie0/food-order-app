@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
-import { TextInput, Button, Text, Snackbar, Surface } from 'react-native-paper';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Animated,
+  Dimensions,
+} from 'react-native';
+import { TextInput, Button, Text, Snackbar } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { Colors } from '../../constants/Colors';
+
+const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -11,8 +22,33 @@ export default function LoginScreen({ navigation }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { login } = useAuth();
+
+  // 动画值
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+
+  React.useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -25,7 +61,6 @@ export default function LoginScreen({ navigation }: any) {
 
     try {
       await login(email.trim(), password);
-      // 登录成功，跳转到首页
       navigation.replace('Home');
     } catch (err: any) {
       setError(err.message || '登录失败，请重试');
@@ -39,56 +74,92 @@ export default function LoginScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      {/* 背景装饰 */}
+      <View style={styles.backgroundDecoration}>
+        <View style={styles.circle1} />
+        <View style={styles.circle2} />
+        <View style={styles.circle3} />
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Logo 区域 */}
-        <View style={styles.logoContainer}>
+        <Animated.View
+          style={[
+            styles.logoContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
+            },
+          ]}
+        >
           <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>🍜</Text>
+            <MaterialCommunityIcons name="food-variant" size={60} color="#FFF" />
           </View>
           <Text style={styles.appName}>美食点餐</Text>
-          <Text style={styles.appSlogan}>美味，触手可及</Text>
-        </View>
+          <Text style={styles.appSlogan}>Discover Delicious</Text>
+        </Animated.View>
 
-        <Surface style={styles.card} elevation={2}>
-          <Text variant="headlineMedium" style={styles.title}>
-            欢迎回来
-          </Text>
-          <Text variant="bodyMedium" style={styles.subtitle}>
-            登录您的账号开始点餐
-          </Text>
+        {/* 登录表单 */}
+        <Animated.View
+          style={[
+            styles.formContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <Text style={styles.welcomeTitle}>欢迎回来</Text>
+          <Text style={styles.welcomeSubtitle}>登录您的账号开始点餐</Text>
 
-          <TextInput
-            label="邮箱"
-            value={email}
-            onChangeText={setEmail}
-            mode="outlined"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-            left={<TextInput.Icon icon="email" color={Colors.primary} />}
-            theme={{ colors: { primary: Colors.primary } }}
-          />
+          {/* 邮箱输入 */}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputIcon}>
+              <MaterialCommunityIcons name="email-outline" size={20} color={Colors.primary} />
+            </View>
+            <TextInput
+              label="邮箱"
+              value={email}
+              onChangeText={setEmail}
+              mode="flat"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              style={styles.input}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+              theme={{ colors: { primary: Colors.primary, background: 'transparent' } }}
+            />
+          </View>
 
-          <TextInput
-            label="密码"
-            value={password}
-            onChangeText={setPassword}
-            mode="outlined"
-            secureTextEntry={!showPassword}
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-            left={<TextInput.Icon icon="lock" color={Colors.primary} />}
-            right={
-              <TextInput.Icon
-                icon={showPassword ? 'eye-off' : 'eye'}
-                onPress={() => setShowPassword(!showPassword)}
-                color={Colors.textLight}
-              />
-            }
-            theme={{ colors: { primary: Colors.primary } }}
-          />
+          {/* 密码输入 */}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputIcon}>
+              <MaterialCommunityIcons name="lock-outline" size={20} color={Colors.primary} />
+            </View>
+            <TextInput
+              label="密码"
+              value={password}
+              onChangeText={setPassword}
+              mode="flat"
+              secureTextEntry={!showPassword}
+              style={styles.input}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+              theme={{ colors: { primary: Colors.primary, background: 'transparent' } }}
+              right={
+                <TextInput.Icon
+                  icon={showPassword ? 'eye-off' : 'eye'}
+                  onPress={() => setShowPassword(!showPassword)}
+                  color={Colors.textLight}
+                />
+              }
+            />
+          </View>
 
+          {/* 登录按钮 */}
           <Button
             mode="contained"
             onPress={handleLogin}
@@ -101,20 +172,22 @@ export default function LoginScreen({ navigation }: any) {
             登 录
           </Button>
 
+          {/* 注册链接 */}
           <View style={styles.registerContainer}>
-            <Text variant="bodyMedium" style={styles.registerText}>还没有账号？</Text>
-            <Button 
-              mode="text" 
-              compact 
+            <Text style={styles.registerText}>还没有账号？</Text>
+            <Button
+              mode="text"
+              compact
               onPress={() => navigation.navigate('Register')}
               labelStyle={styles.registerButtonLabel}
             >
               立即注册
             </Button>
           </View>
-        </Surface>
+        </Animated.View>
       </ScrollView>
 
+      {/* 错误提示 */}
       <Snackbar
         visible={!!error}
         onDismiss={() => setError('')}
@@ -132,6 +205,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  backgroundDecoration: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    overflow: 'hidden',
+  },
+  circle1: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: Colors.primary + '15',
+    top: -100,
+    right: -100,
+  },
+  circle2: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: Colors.primary + '10',
+    top: 100,
+    left: -80,
+  },
+  circle3: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: Colors.primary + '08',
+    bottom: 100,
+    right: -50,
+  },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -139,75 +247,89 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
   },
   logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-    elevation: 4,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  logoText: {
-    fontSize: 48,
+    marginBottom: 20,
+    elevation: 8,
+    shadowColor: Colors.shadow.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
   },
   appName: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 4,
+    color: Colors.text,
+    marginBottom: 8,
+    letterSpacing: 2,
   },
   appSlogan: {
     fontSize: 14,
     color: Colors.textLight,
-    letterSpacing: 2,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
   },
-  card: {
-    padding: 28,
-    borderRadius: 20,
+  formContainer: {
     backgroundColor: Colors.card,
+    borderRadius: 24,
+    padding: 28,
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: Colors.shadow.medium,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: 12,
   },
-  title: {
-    textAlign: 'center',
-    marginBottom: 8,
+  welcomeTitle: {
+    fontSize: 26,
     fontWeight: 'bold',
     color: Colors.text,
-    fontSize: 24,
-  },
-  subtitle: {
+    marginBottom: 8,
     textAlign: 'center',
-    marginBottom: 32,
-    color: Colors.textLight,
+  },
+  welcomeSubtitle: {
     fontSize: 14,
+    color: Colors.textLight,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 16,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    marginBottom: 16,
-    backgroundColor: Colors.card,
-  },
-  inputOutline: {
-    borderRadius: 12,
-    borderWidth: 1.5,
+    flex: 1,
+    backgroundColor: 'transparent',
+    height: 56,
+    fontSize: 15,
   },
   loginButton: {
-    marginTop: 16,
-    borderRadius: 12,
-    elevation: 2,
+    marginTop: 24,
+    borderRadius: 16,
     backgroundColor: Colors.primary,
+    elevation: 4,
+    shadowColor: Colors.shadow.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   buttonContent: {
-    height: 52,
+    height: 56,
   },
   buttonLabel: {
     fontSize: 16,
@@ -218,7 +340,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 28,
+    marginTop: 24,
   },
   registerText: {
     color: Colors.textLight,
@@ -231,5 +353,7 @@ const styles = StyleSheet.create({
   },
   snackbar: {
     backgroundColor: Colors.error,
+    borderRadius: 12,
+    marginHorizontal: 16,
   },
 });

@@ -11,6 +11,35 @@ import {
 // 生产环境使用公网服务器地址
 const API_BASE_URL = 'http://8.135.17.245:11170';
 
+// 将 snake_case 转换为 camelCase
+function toCamelCase(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+// 递归转换对象中的字段名
+function convertKeysToCamelCase(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(convertKeysToCamelCase);
+  }
+  
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const camelKey = toCamelCase(key);
+        result[camelKey] = convertKeysToCamelCase(obj[key]);
+      }
+    }
+    return result;
+  }
+  
+  return obj;
+}
+
 // 获取 token
 async function getToken(): Promise<string | null> {
   return await AsyncStorage.getItem('access_token');
@@ -103,7 +132,8 @@ export const authApi = {
       }
       
       // 尝试从服务器获取
-      const user = await apiRequest<User>('/api/auth/me');
+      const data = await apiRequest<any>('/api/auth/me');
+      const user = convertKeysToCamelCase(data);
       await AsyncStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch {
@@ -121,13 +151,15 @@ export const dishApi = {
       params.append('category', category);
     }
     const query = params.toString() ? `?${params.toString()}` : '';
-    return await apiRequest<Dish[]>(`/api/dishes${query}`);
+    const data = await apiRequest<any[]>(`/api/dishes${query}`);
+    return convertKeysToCamelCase(data);
   },
 
   // 获取单个菜品
   getDish: async (id: string): Promise<Dish | null> => {
     try {
-      return await apiRequest<Dish>(`/api/dishes/${id}`);
+      const data = await apiRequest<any>(`/api/dishes/${id}`);
+      return convertKeysToCamelCase(data);
     } catch {
       return null;
     }
@@ -135,18 +167,20 @@ export const dishApi = {
 
   // 创建菜品（管理员）
   createDish: async (data: Omit<Dish, 'id' | 'createdAt'>): Promise<Dish> => {
-    return await apiRequest<Dish>('/api/dishes', {
+    const result = await apiRequest<any>('/api/dishes', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return convertKeysToCamelCase(result);
   },
 
   // 更新菜品（管理员）
   updateDish: async (id: string, data: Partial<Dish>): Promise<Dish> => {
-    return await apiRequest<Dish>(`/api/dishes/${id}`, {
+    const result = await apiRequest<any>(`/api/dishes/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+    return convertKeysToCamelCase(result);
   },
 
   // 删除菜品（管理员）
@@ -166,7 +200,8 @@ export const orderApi = {
       params.append('status', status);
     }
     const query = params.toString() ? `?${params.toString()}` : '';
-    return await apiRequest<Order[]>(`/api/orders${query}`);
+    const data = await apiRequest<any[]>(`/api/orders${query}`);
+    return convertKeysToCamelCase(data);
   },
 
   // 获取用户的订单
@@ -180,7 +215,7 @@ export const orderApi = {
     items: { dishId: string; quantity: number }[];
     note?: string;
   }): Promise<Order> => {
-    return await apiRequest<Order>('/api/orders', {
+    const result = await apiRequest<any>('/api/orders', {
       method: 'POST',
       body: JSON.stringify({
         items: data.items.map(item => ({
@@ -190,14 +225,16 @@ export const orderApi = {
         note: data.note,
       }),
     });
+    return convertKeysToCamelCase(result);
   },
 
   // 更新订单状态
   updateOrderStatus: async (id: string, status: OrderStatus): Promise<Order> => {
-    return await apiRequest<Order>(`/api/orders/${id}/status`, {
+    const result = await apiRequest<any>(`/api/orders/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
     });
+    return convertKeysToCamelCase(result);
   },
 
   // 取消订单
@@ -268,12 +305,13 @@ export const cartApi = {
 // 统计 API（管理员）
 export const statsApi = {
   getStats: async (): Promise<{
-    total_orders: number;
-    pending_orders: number;
-    preparing_orders: number;
-    completed_orders: number;
-    today_revenue: number;
+    totalOrders: number;
+    pendingOrders: number;
+    preparingOrders: number;
+    completedOrders: number;
+    todayRevenue: number;
   }> => {
-    return await apiRequest('/api/stats');
+    const data = await apiRequest<any>('/api/stats');
+    return convertKeysToCamelCase(data);
   },
 };

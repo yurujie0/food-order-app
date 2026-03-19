@@ -30,7 +30,7 @@ class Dish(Base):
     is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    order_items = relationship("OrderItem", back_populates="dish")
+    order_items = relationship("OrderItem", back_populates="dish", cascade="all, delete-orphan")
 
 
 class Order(Base):

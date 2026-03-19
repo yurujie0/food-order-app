@@ -310,6 +310,8 @@ export const statsApi = {
     preparingOrders: number;
     completedOrders: number;
     todayRevenue: number;
+    totalDishes: number;
+    availableDishes: number;
   }> => {
     const data = await apiRequest<any>('/api/stats');
     return convertKeysToCamelCase(data);

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Card, Text, Button, List, Avatar } from 'react-native-paper';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useOrders } from '../../hooks/useOrders';
@@ -14,12 +15,13 @@ interface OrderStats {
   completed: number;
   cancelled: number;
   todayRevenue: number;
+  totalDishes: number;
+  availableDishes: number;
 }
 
 export default function AdminDashboardScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const { orders, getOrderStats } = useOrders();
-  const { dishes } = useDishes();
   
   const [stats, setStats] = useState<OrderStats>({
     total: 0,
@@ -28,6 +30,8 @@ export default function AdminDashboardScreen({ navigation }: any) {
     completed: 0,
     cancelled: 0,
     todayRevenue: 0,
+    totalDishes: 0,
+    availableDishes: 0,
   });
 
   useEffect(() => {
@@ -37,6 +41,8 @@ export default function AdminDashboardScreen({ navigation }: any) {
     };
     loadStats();
   }, [orders]);
+
+
 
   const handleLogout = async () => {
     await logout();
@@ -99,7 +105,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
         <Card.Content>
           <List.Item
             title="管理菜谱"
-            description={`当前共有 ${dishes.length} 道菜品`}
+            description={`当前共有 ${stats.totalDishes} 道菜品`}
             left={props => <List.Icon {...props} icon="food-variant" color={Colors.primary} />}
             right={props => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => navigation.navigate('AdminDishesTab')}

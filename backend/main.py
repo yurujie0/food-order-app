@@ -375,12 +375,18 @@ def get_stats(
         models.Order.status != "cancelled"
     ).scalar() or 0
     
+    # 菜品统计
+    total_dishes = db.query(models.Dish).count()
+    available_dishes = db.query(models.Dish).filter(models.Dish.is_available == True).count()
+    
     return {
         "total_orders": total_orders,
         "pending_orders": pending_orders,
         "preparing_orders": preparing_orders,
         "completed_orders": completed_orders,
         "today_revenue": today_revenue,
+        "total_dishes": total_dishes,
+        "available_dishes": available_dishes,
     }
 
 

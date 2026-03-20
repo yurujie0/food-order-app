@@ -119,7 +119,7 @@ git -C "$PROJECT_DIR" push
 # SSH 到 cloud1 拉取最新代码并重启
 echo "SSH 到 cloud1 拉取最新代码..."
 ssh -o StrictHostKeyChecking=no $CLOUD1_HOST << 'SSHEOF'
-    cd /home/yurujie/.openclaw/workspace/food-order-app
+    cd /home/admin/.openclaw/workspace/food-order-app
     git pull origin main
     
     # 重启后端服务

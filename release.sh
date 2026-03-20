@@ -36,64 +36,24 @@ echo ""
 # 1. 更新本地后端版本信息
 echo -e "${YELLOW}[1/6] 更新本地后端版本信息...${NC}"
 cd "$PROJECT_DIR/backend"
-python3 << EOF
-import re
 
-with open('main.py', 'r') as f:
-    content = f.read()
+# 使用 sed 直接替换
+sed -i "s/\"version\":\s*\"[^\"]*\"/\"version\": \"${VERSION}\"/" main.py
+sed -i "s/\"version_code\":\s*[0-9]\+/\"version_code\": ${VERSION_CODE}/" main.py
+sed -i "s/\"download_url\":\s*\"[^\"]*\"/\"download_url\": \"http:\/\/8.135.17.245:18000\/download\/PLACEHOLDER\"/" main.py
+sed -i "s/\"release_notes\":\s*\"[^\"]*\"/\"release_notes\": \"${RELEASE_NOTES}\"/" main.py
 
-content = re.sub(
-    r'"version":\s*"[^"]*",',
-    f'"version": "{VERSION}",',
-    content
-)
-content = re.sub(
-    r'"version_code":\s*\d+,',
-    f'"version_code": {VERSION_CODE},',
-    content
-)
-content = re.sub(
-    r'"download_url":\s*"[^"]*",',
-    f'"download_url": "http://8.135.17.245:18000/download/PLACEHOLDER",',
-    content
-)
-content = re.sub(
-    r'"release_notes":\s*"[^"]*",',
-    f'"release_notes": "{RELEASE_NOTES}",',
-    content
-)
-
-with open('main.py', 'w') as f:
-    f.write(content)
-
-print("后端版本已更新")
-EOF
+echo "后端版本已更新"
 
 # 1.5 更新前端版本号
 echo -e "${YELLOW}[1.5/6] 更新前端版本号...${NC}"
 cd "$PROJECT_DIR"
-python3 << EOF
-import re
 
-with open('hooks/useVersionCheck.ts', 'r') as f:
-    content = f.read()
+# 使用 sed 直接替换
+sed -i "s/const CURRENT_VERSION = '[^']*';/const CURRENT_VERSION = '${VERSION}';/" hooks/useVersionCheck.ts
+sed -i "s/const CURRENT_VERSION_CODE = [0-9]\+;/const CURRENT_VERSION_CODE = ${VERSION_CODE};/" hooks/useVersionCheck.ts
 
-content = re.sub(
-    r"const CURRENT_VERSION = '[^']*';",
-    f"const CURRENT_VERSION = '{VERSION}';",
-    content
-)
-content = re.sub(
-    r'const CURRENT_VERSION_CODE = \d+;',
-    f'const CURRENT_VERSION_CODE = {VERSION_CODE};',
-    content
-)
-
-with open('hooks/useVersionCheck.ts', 'w') as f:
-    f.write(content)
-
-print("前端版本已更新")
-EOF
+echo "前端版本已更新"
 
 echo "VERSION=${VERSION}" > /tmp/version_info
 echo "VERSION_CODE=${VERSION_CODE}" >> /tmp/version_info
@@ -137,23 +97,11 @@ echo -e "${GREEN}下载链接: $DOWNLOAD_URL${NC}"
 # 4. 更新本地 main.py 中的下载链接
 echo -e "${YELLOW}[5/6] 更新下载链接...${NC}"
 cd "$PROJECT_DIR/backend"
-python3 << EOF
-import re
 
-with open('main.py', 'r') as f:
-    content = f.read()
+# 使用 sed 直接替换下载链接
+sed -i "s|\"download_url\":\s*\"[^\"]*\"|\"download_url\": \"${DOWNLOAD_URL}\"|" main.py
 
-content = re.sub(
-    r'"download_url":\s*"[^"]*",',
-    f'"download_url": "{DOWNLOAD_URL}",',
-    content
-)
-
-with open('main.py', 'w') as f:
-    f.write(content)
-
-print("下载链接已更新")
-EOF
+echo "下载链接已更新"
 
 # 5. 提交代码
 echo -e "${YELLOW}[6/6] 提交并推送代码...${NC}"

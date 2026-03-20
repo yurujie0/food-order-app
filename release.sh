@@ -66,7 +66,33 @@ content = re.sub(
 with open('main.py', 'w') as f:
     f.write(content)
 
-print("本地版本已更新")
+print("后端版本已更新")
+EOF
+
+# 1.5 更新前端版本号
+echo -e "${YELLOW}[1.5/6] 更新前端版本号...${NC}"
+cd "$PROJECT_DIR"
+python3 << EOF
+import re
+
+with open('hooks/useVersionCheck.ts', 'r') as f:
+    content = f.read()
+
+content = re.sub(
+    r"const CURRENT_VERSION = '[^']*';",
+    f"const CURRENT_VERSION = '{VERSION}';",
+    content
+)
+content = re.sub(
+    r'const CURRENT_VERSION_CODE = \d+;',
+    f'const CURRENT_VERSION_CODE = {VERSION_CODE};',
+    content
+)
+
+with open('hooks/useVersionCheck.ts', 'w') as f:
+    f.write(content)
+
+print("前端版本已更新")
 EOF
 
 echo "VERSION=${VERSION}" > /tmp/version_info

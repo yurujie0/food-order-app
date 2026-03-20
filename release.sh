@@ -122,16 +122,11 @@ ssh -o StrictHostKeyChecking=no $CLOUD1_HOST << 'SSHEOF'
     cd /home/admin/.openclaw/workspace/food-order-app
     git pull origin main
     
-    # 重启后端服务（支持 uvicorn 和 python main.py 两种方式）
-    pkill -f "uvicorn main:app" 2>/dev/null || true
-    pkill -f "python main.py" 2>/dev/null || true
-    sleep 2
-    
-    cd backend
-    # 使用 venv 中的 uvicorn 启动
-    source venv/bin/activate
-    nohup uvicorn main:app --host 0.0.0.0 --port 11170 > /tmp/food_order_backend.log 2>&1 &
+    # 使用 systemctl 重启后端服务
+    sudo systemctl restart food-order-app
     echo "后端服务已重启"
+    sleep 2
+    sudo systemctl status food-order-app --no-pager | head -5
 SSHEOF
 
 echo ""

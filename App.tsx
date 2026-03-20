@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
@@ -8,6 +8,8 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Colors } from './constants/Colors';
+import { useVersionCheck } from './hooks/useVersionCheck';
+import { UpdateDialog } from './components/UpdateDialog';
 
 // Auth Screens
 import LoginScreen from './app/(auth)/login';
@@ -235,11 +237,25 @@ function Navigation() {
   );
 }
 
+// 版本检测组件
+function VersionChecker() {
+  const { updateInfo, hasUpdate, dismissUpdate } = useVersionCheck();
+  
+  return (
+    <UpdateDialog
+      visible={hasUpdate}
+      updateInfo={updateInfo}
+      onDismiss={dismissUpdate}
+    />
+  );
+}
+
 export default function App() {
   return (
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
         <AuthProvider>
+          <VersionChecker />
           <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }} edges={['top']}>
             <Navigation />
             <StatusBar style="dark" backgroundColor={Colors.background} />

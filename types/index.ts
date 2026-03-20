@@ -105,3 +105,12 @@ export interface Colors {
   success: string;
   warning: string;
 }
+
+// 版本信息
+export interface VersionInfo {
+  version: string;
+  versionCode: number;
+  downloadUrl: string;
+  releaseNotes: string;
+  forceUpdate: boolean;
+}

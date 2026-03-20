@@ -317,3 +317,17 @@ export const statsApi = {
     return convertKeysToCamelCase(data);
   },
 };
+
+// 版本 API
+export const versionApi = {
+  checkUpdate: async (): Promise<{
+    version: string;
+    versionCode: number;
+    downloadUrl: string;
+    releaseNotes: string;
+    forceUpdate: boolean;
+  }> => {
+    const data = await apiRequest<any>('/api/version/latest');
+    return convertKeysToCamelCase(data);
+  },
+};

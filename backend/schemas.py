@@ -119,3 +119,13 @@ class CartItem(BaseModel):
 class CartItemResponse(BaseModel):
     dish: DishResponse
     quantity: int
+
+
+# ========== 版本相关 ==========
+
+class VersionResponse(BaseModel):
+    version: str
+    version_code: int
+    download_url: str
+    release_notes: str
+    force_update: bool

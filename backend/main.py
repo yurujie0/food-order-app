@@ -390,6 +390,22 @@ def get_stats(
     }
 
 
+# ========== 版本检查 ==========
+
+@app.get("/api/version/latest", response_model=schemas.VersionResponse)
+def get_latest_version():
+    """
+    获取最新版本信息
+    """
+    return {
+        "version": "1.6",
+        "version_code": 6,
+        "download_url": "http://8.135.17.245:18000/download/20ee6649_food-order-app-v1.6.apk",
+        "release_notes": "修复图标显示问题，优化用户体验",
+        "force_update": False,
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=18000)

@@ -400,8 +400,8 @@ def get_latest_version():
     return {
         "version": "1.7",
         "version_code": 7,
-        "download_url": "http://8.135.17.245:18000/download/09ebb201_food-order-app-v1.7.apk",
-        "release_notes": "新增应用自动升级功能",
+        "download_url": "http://8.135.17.245:18000/download/ea37fc14_food-order-app-v1.7-fixed.apk",
+        "release_notes": "修复版本检测问题",
         "force_update": False,
     }
 

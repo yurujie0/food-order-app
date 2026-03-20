@@ -109,78 +109,165 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TextInput
-        label="菜品名称"
-        value={name}
-        onChangeText={setName}
-        mode="outlined"
-        error={!!errors.name}
-        style={styles.input}
-      />
-      {errors.name && <HelperText type="error">{errors.name}</HelperText>}
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* 标题 */}
+      <View style={styles.header}>
+        <MaterialCommunityIcons 
+          name={dish ? 'food' : 'food-plus'} 
+          size={24} 
+          color={Colors.primary} 
+        />
+        <Text variant="titleLarge" style={styles.headerTitle}>
+          {dish ? '编辑菜品' : '添加新菜品'}
+        </Text>
+      </View>
 
-      <TextInput
-        label="价格 (¥)"
-        value={price}
-        onChangeText={setPrice}
-        mode="outlined"
-        keyboardType="decimal-pad"
-        error={!!errors.price}
-        style={styles.input}
-      />
-      {errors.price && <HelperText type="error">{errors.price}</HelperText>}
-
-      <Text style={styles.label}>分类</Text>
-      <SegmentedButtons
-        value={category}
-        onValueChange={(value) => setCategory(value as DishCategory)}
-        buttons={categories.map(cat => ({
-          value: cat.value,
-          label: cat.label,
-        }))}
-        style={styles.segmentedButtons}
-      />
-
-      <TextInput
-        label="描述"
-        value={description}
-        onChangeText={setDescription}
-        mode="outlined"
-        multiline
-        numberOfLines={3}
-        error={!!errors.description}
-        style={styles.input}
-      />
-      {errors.description && <HelperText type="error">{errors.description}</HelperText>}
-
-      <Text style={styles.label}>菜品图片</Text>
+      {/* 菜品图片 */}
+      <Text style={styles.sectionTitle}>菜品图片</Text>
       <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
         {image ? (
           <Image source={{ uri: image }} style={styles.imagePreview} />
         ) : (
           <View style={styles.imagePlaceholder}>
-            <MaterialCommunityIcons name="camera-plus" size={40} color={Colors.textMuted} />
-            <Text style={styles.imagePlaceholderText}>点击选择图片</Text>
+            <MaterialCommunityIcons name="camera-plus" size={48} color={Colors.textMuted} />
+            <Text style={styles.imagePlaceholderText}>点击上传菜品图片</Text>
+            <Text style={styles.imageHint}>建议尺寸: 800x600</Text>
           </View>
         )}
+        <View style={styles.imageOverlay}>
+          <MaterialCommunityIcons name="pencil" size={20} color="#FFF" />
+        </View>
       </TouchableOpacity>
-      {errors.image && <HelperText type="error">{errors.image}</HelperText>}
+      {errors.image && <HelperText type="error" style={styles.errorText}>{errors.image}</HelperText>}
 
+      {/* 菜品名称 */}
+      <View style={styles.inputGroup}>
+        <View style={styles.inputHeader}>
+          <MaterialCommunityIcons name="food-variant" size={18} color={Colors.primary} />
+          <Text style={styles.inputLabel}>菜品名称</Text>
+        </View>
+        <TextInput
+          placeholder="输入菜品名称"
+          value={name}
+          onChangeText={setName}
+          mode="outlined"
+          error={!!errors.name}
+          style={styles.input}
+          outlineColor={Colors.border}
+          activeOutlineColor={Colors.primary}
+        />
+        {errors.name && <HelperText type="error" style={styles.errorText}>{errors.name}</HelperText>}
+      </View>
+
+      {/* 价格 */}
+      <View style={styles.inputGroup}>
+        <View style={styles.inputHeader}>
+          <MaterialCommunityIcons name="currency-cny" size={18} color={Colors.primary} />
+          <Text style={styles.inputLabel}>价格</Text>
+        </View>
+        <TextInput
+          placeholder="输入价格"
+          value={price}
+          onChangeText={setPrice}
+          mode="outlined"
+          keyboardType="decimal-pad"
+          error={!!errors.price}
+          style={styles.input}
+          outlineColor={Colors.border}
+          activeOutlineColor={Colors.primary}
+          left={<TextInput.Affix text="¥" />}
+        />
+        {errors.price && <HelperText type="error" style={styles.errorText}>{errors.price}</HelperText>}
+      </View>
+
+      {/* 分类 */}
+      <View style={styles.inputGroup}>
+        <View style={styles.inputHeader}>
+          <MaterialCommunityIcons name="tag" size={18} color={Colors.primary} />
+          <Text style={styles.inputLabel}>分类</Text>
+        </View>
+        <View style={styles.categoryContainer}>
+          {categories.map(cat => (
+            <TouchableOpacity
+              key={cat.value}
+              style={[
+                styles.categoryButton,
+                category === cat.value && { 
+                  backgroundColor: Colors.category[cat.value],
+                  borderColor: Colors.category[cat.value],
+                },
+              ]}
+              onPress={() => setCategory(cat.value)}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  category === cat.value && styles.categoryTextActive,
+                ]}
+              >
+                {cat.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* 描述 */}
+      <View style={styles.inputGroup}>
+        <View style={styles.inputHeader}>
+          <MaterialCommunityIcons name="text" size={18} color={Colors.primary} />
+          <Text style={styles.inputLabel}>菜品描述</Text>
+        </View>
+        <TextInput
+          placeholder="描述菜品的特色和口味"
+          value={description}
+          onChangeText={setDescription}
+          mode="outlined"
+          multiline
+          numberOfLines={4}
+          error={!!errors.description}
+          style={styles.input}
+          outlineColor={Colors.border}
+          activeOutlineColor={Colors.primary}
+        />
+        {errors.description && <HelperText type="error" style={styles.errorText}>{errors.description}</HelperText>}
+      </View>
+
+      {/* 上架状态 */}
       <View style={styles.switchContainer}>
-        <Text>上架状态</Text>
+        <View style={styles.switchLeft}>
+          <MaterialCommunityIcons 
+            name={isAvailable ? 'check-circle' : 'circle-outline'} 
+            size={22} 
+            color={isAvailable ? Colors.success : Colors.textMuted} 
+          />
+          <Text style={styles.switchLabel}>上架状态</Text>
+          <View style={[
+            styles.statusBadge,
+            { backgroundColor: isAvailable ? Colors.success + '20' : Colors.textMuted + '20' }
+          ]}>
+            <Text style={[
+              styles.statusText,
+              { color: isAvailable ? Colors.success : Colors.textMuted }
+            ]}>
+              {isAvailable ? '已上架' : '已下架'}
+            </Text>
+          </View>
+        </View>
         <Switch
           value={isAvailable}
           onValueChange={setIsAvailable}
-          color={Colors.primary}
+          color={Colors.success}
         />
       </View>
 
+      {/* 按钮 */}
       <View style={styles.buttons}>
         <Button
           mode="outlined"
           onPress={onCancel}
-          style={styles.button}
+          style={styles.cancelButton}
+          textColor={Colors.textLight}
           disabled={isLoading}
         >
           取消
@@ -188,9 +275,11 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
         <Button
           mode="contained"
           onPress={handleSubmit}
-          style={styles.button}
+          style={styles.submitButton}
+          buttonColor={Colors.primary}
           loading={isLoading}
           disabled={isLoading}
+          icon={dish ? 'check' : 'plus'}
         >
           {dish ? '保存修改' : '添加菜品'}
         </Button>
@@ -201,26 +290,38 @@ export function AdminDishForm({ dish, onSubmit, onCancel, isLoading = false }: A
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 20,
+    paddingBottom: 40,
   },
-  input: {
-    marginBottom: 4,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.divider,
   },
-  label: {
-    marginTop: 8,
-    marginBottom: 8,
-    fontSize: 16,
+  headerTitle: {
+    fontWeight: 'bold',
+    color: Colors.text,
   },
-  segmentedButtons: {
-    marginBottom: 16,
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
   },
   imagePicker: {
     width: '100%',
-    height: 200,
+    height: 180,
     backgroundColor: Colors.background,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 8,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
   },
   imagePreview: {
     width: '100%',
@@ -233,24 +334,110 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imagePlaceholderText: {
-    marginTop: 8,
+    marginTop: 12,
     color: Colors.textMuted,
+    fontSize: 15,
+  },
+  imageHint: {
+    marginTop: 4,
+    color: Colors.textMuted,
+    fontSize: 12,
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: Colors.primary,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  inputLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  input: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+  },
+  errorText: {
+    marginLeft: 4,
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  categoryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+  },
+  categoryText: {
     fontSize: 14,
+    color: Colors.textLight,
+    fontWeight: '500',
+  },
+  categoryTextActive: {
+    color: '#FFF',
+    fontWeight: '600',
   },
   switchContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 16,
-    paddingHorizontal: 4,
+    marginTop: 8,
+    marginBottom: 24,
+    padding: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+  },
+  switchLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  switchLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   buttons: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 40,
+    gap: 14,
+    marginTop: 8,
   },
-  button: {
+  cancelButton: {
     flex: 1,
+    borderRadius: 12,
+    borderColor: Colors.border,
+  },
+  submitButton: {
+    flex: 1.2,
+    borderRadius: 12,
   },
 });

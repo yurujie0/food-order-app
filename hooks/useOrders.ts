@@ -58,6 +58,8 @@ export function useOrders(userId?: string) {
         completed: stats.completedOrders,
         cancelled: orders.filter(o => o.status === 'cancelled').length,
         todayRevenue: stats.todayRevenue,
+        totalDishes: stats.totalDishes,
+        availableDishes: stats.availableDishes,
       };
     } catch {
       // 如果获取失败，使用本地计算
@@ -74,6 +76,8 @@ export function useOrders(userId?: string) {
             return orderDate === today && o.status !== 'cancelled';
           })
           .reduce((sum, o) => sum + o.totalAmount, 0),
+        totalDishes: 0,
+        availableDishes: 0,
       };
     }
   }, [orders]);

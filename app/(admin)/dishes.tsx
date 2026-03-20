@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl, Alert, TouchableOpacity } from 'react-native';
 import { Searchbar, FAB, Portal, Dialog, Snackbar, Text } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { IconButton } from 'react-native-paper';
 import { useDishes } from '../../hooks/useDishes';
 import { DishCard } from '../../components/DishCard';
 import { AdminDishForm } from '../../components/AdminDishForm';
@@ -120,36 +121,30 @@ export default function AdminDishesScreen() {
         showActions={false}
       />
       <View style={styles.actions}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: item.isAvailable ? Colors.success + '20' : Colors.textMuted + '20' }]}
+        <IconButton
+          icon={item.isAvailable ? 'eye' : 'eye-off'}
+          size={20}
+          iconColor="#FFF"
+          containerColor={item.isAvailable ? Colors.success : Colors.textMuted}
           onPress={() => toggleAvailability(item.id)}
-        >
-          <MaterialCommunityIcons
-            name={item.isAvailable ? 'eye-outline' : 'eye-off-outline'}
-            size={20}
-            color={item.isAvailable ? Colors.success : Colors.textMuted}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: Colors.info + '20' }]}
+          style={styles.iconButton}
+        />
+        <IconButton
+          icon="pencil"
+          size={20}
+          iconColor="#FFF"
+          containerColor={Colors.info}
           onPress={() => handleEdit(item)}
-        >
-          <MaterialCommunityIcons
-            name="pencil-outline"
-            size={20}
-            color={Colors.info}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: Colors.error + '20' }]}
+          style={styles.iconButton}
+        />
+        <IconButton
+          icon="delete"
+          size={20}
+          iconColor="#FFF"
+          containerColor={Colors.error}
           onPress={() => handleDelete(item)}
-        >
-          <MaterialCommunityIcons
-            name="trash-can-outline"
-            size={20}
-            color={Colors.error}
-          />
-        </TouchableOpacity>
+          style={styles.iconButton}
+        />
       </View>
     </View>
   );
@@ -232,25 +227,31 @@ const styles = StyleSheet.create({
   },
   dishContainer: {
     position: 'relative',
+    marginBottom: 8,
   },
   actions: {
     position: 'absolute',
-    bottom: 16,
-    right: 24,
+    bottom: 12,
+    right: 20,
     flexDirection: 'row',
     gap: 8,
+    zIndex: 100,
+    elevation: 10,
+  },
+  iconButton: {
+    margin: 0,
+    marginHorizontal: 2,
   },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: Colors.shadow.medium,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginHorizontal: 2,
+  },
+  actionButtonText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
   fab: {
     position: 'absolute',

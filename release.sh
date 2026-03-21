@@ -72,6 +72,55 @@ fi
 
 echo "sdk.dir=$HOME/android-sdk" > android/local.properties
 
+# 2.5 复制自定义图标到 Android 项目
+echo -e "${YELLOW}[2.5/6] 复制自定义图标到 Android 项目...${NC}"
+cd "$PROJECT_DIR"
+
+# Android mipmap 尺寸映射
+# mdpi: 48px, hdpi: 72px, xhdpi: 96px, xxhdpi: 144px, xxxhdpi: 192px
+declare -A ICON_SIZES=(
+    ["mipmap-mdpi"]=48
+    ["mipmap-hdpi"]=72
+    ["mipmap-xhdpi"]=96
+    ["mipmap-xxhdpi"]=144
+    ["mipmap-xxxhdpi"]=192
+)
+
+# 检查并生成缺失的图标尺寸
+for size in 48 72 96 144 192; do
+    if [ ! -f "assets/icon-${size}.png" ]; then
+        echo "生成 icon-${size}.png..."
+        node -e "
+const sharp = require('sharp');
+sharp('assets/icon.svg').resize(${size}, ${size}).png().toFile('assets/icon-${size}.png').then(() => console.log('✓ icon-${size}.png 已生成'));
+"
+    fi
+done
+
+# 复制图标到 Android 项目的各个 mipmap 目录
+for folder in "${!ICON_SIZES[@]}"; do
+    size=${ICON_SIZES[$folder]}
+    source_file="assets/icon-${size}.png"
+    target_dir="android/app/src/main/res/${folder}"
+    
+    if [ -f "$source_file" ]; then
+        # 删除旧的 webp 文件
+        for old_file in "$target_dir"/ic_launcher*.webp; do
+            [ -f "$old_file" ] && rm "$old_file" && echo "删除: $old_file"
+        done
+        
+        # 复制新的 png 图标
+        cp "$source_file" "$target_dir/ic_launcher.png"
+        cp "$source_file" "$target_dir/ic_launcher_round.png"
+        cp "$source_file" "$target_dir/ic_launcher_foreground.png"
+        echo "✓ 已复制 ${size}px 图标到 ${folder}/"
+    else
+        echo -e "${RED}警告: 源文件不存在: $source_file${NC}"
+    fi
+done
+
+echo "图标复制完成"
+
 echo -e "${YELLOW}[3/6] 构建 Release APK...${NC}"
 cd android
 export JAVA_HOME

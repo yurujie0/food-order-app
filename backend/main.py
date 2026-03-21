@@ -398,10 +398,10 @@ def get_latest_version():
     获取最新版本信息
     """
     return {
-        "version": "1.9.2",
-        "version_code": 11,
-        "download_url": "http://8.135.17.245:18000/download/234c4f15_food-order-app-v1.9.2.apk",
-        "release_notes": "发布v1.9.2版本",
+        "version": "1.9.3",
+        "version_code": 12,
+        "download_url": "http://8.135.17.245:18000/download/1b9204e1_food-order-app-v1.9.3.apk",
+        "release_notes": "修复桌面图标显示",
         "force_update": False,
     }
 

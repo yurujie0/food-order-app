@@ -4,8 +4,8 @@ import { versionApi } from '../services/api';
 import { VersionInfo } from '../types';
 
 // 当前应用版本
-const CURRENT_VERSION = '1.9.1';
-const CURRENT_VERSION_CODE = 10;
+const CURRENT_VERSION = '1.9.2';
+const CURRENT_VERSION_CODE = 11;
 
 export function useVersionCheck() {
   const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
